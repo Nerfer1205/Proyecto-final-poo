@@ -13,8 +13,9 @@ import org.jsoup.select.Elements;
 
 
 public class Scraper {
+	private Notificacion noti = new Notificacion();
 	public void Scraper() { //Constructor
-		
+		Notificacion noti = new Notificacion();
 	}
 	
 	public String reclasificasion(String equipo) { // mina datos de la tabla de reclasificación
@@ -100,7 +101,7 @@ public class Scraper {
 						}
 						comparar += titulo.text()+" ";//guarda titulos de la fila
 					}
-					if (!comparar.isBlank() || comparar.compareTo(temp)!=0) {//si no esta vacio o es diferente al anterior se toma como titulo temporal
+					if (!comparar.isEmpty() || comparar.compareTo(temp)!=0) {//si no esta vacio o es diferente al anterior se toma como titulo temporal
 						temp=comparar;
 					}
 					for (Element celda : celdas) {
@@ -145,7 +146,7 @@ public class Scraper {
 				if (cont.size() > 0 ) {
 					plantilla += "<tr><th>Hora</th> <th>" + temps.get(i)//completo el HTML con que se almaceno en los arrays
 							+ "</th><th>Estadio</th> </tr>  <tr>" + "<td>" + cont.get(i * 3) + "</td>\r\n"//se multiplica por 3 porq siempre habran 3 celdas por fila
-							+ "    <td width =\"330\">\r\n" + "<div> \r\n" + "<img src=" + imgs.get(2 * i) + ">\r\n"//se multiplica por 2 porq siempre habran dos imagenes por fila
+							+ "    <td width =\"330\">\r\n" + "<div align=\"center\"> \r\n" + "<img src=" + imgs.get(2 * i) + ">\r\n"//se multiplica por 2 porq siempre habran dos imagenes por fila
 							+ cont.get(3 * i + 1) + "\r\n" + "\r\n" + "<img src=" + imgs.get(2 * i + 1) + ">\r\n "
 							+ "</div>\r\n" + "</td>\r\n" + "<td>" + cont.get(3 * i + 2) + "</td>\r\n" + "</tr>\r\n";
 							
@@ -165,7 +166,7 @@ public class Scraper {
 		String img ="";
 		int filaE=0;
 		Element coincidencia=null;
-		String clasificacion = "<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
+		String clasificacion = "\r\n<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}</style>\r\n" + "<body>\r\n"
 				+ "<h1 align = \"center\">Clasificación</h1>" + "<table align=\"center\">\r\n<tr>";
 		try {
@@ -220,14 +221,14 @@ public class Scraper {
 		Calendar cal = Calendar.getInstance();//consegui automaticamente la fecha actual
 		String fecha ="";//para almacenar la fecha como string
 		String equipo = eq;
-		String plantilla ="<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
+		String plantilla ="\r\n<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}\r\n"
 				+ "</style>\r\n<body>"+"<h1 align = \"center\">Artículos</h1>"+"<table align=\"center\">\r\n" ;
 		ArrayList <String> ltitulos = new ArrayList<>();
 		ArrayList <String> lcontenidos = new ArrayList<>();
 		ArrayList <String> lLinks = new ArrayList<>();//hipervinculos de las noticias
 		ArrayList <String> imgs = new ArrayList<>();//imagenes
-		ArrayList <String> res = new ArrayList<>();
+
 		//ya q la fecha solo se recibe en el siguiente formato YY/MM//DD los condicionales la modifican a como lo trae Calendar
 		if (cal.get(Calendar.MONTH) > 9 && cal.get(Calendar.DAY_OF_MONTH)>9) {
 			fecha = String.valueOf(cal.get(Calendar.YEAR)).substring(2) + "-" + String.valueOf(cal.get(Calendar.MONTH))
@@ -282,13 +283,22 @@ public class Scraper {
 							+ "  </tr>\r\n" + "   <tr>\r\n" + "    <td>" + lLinks.get(lLinks.size() - 1) + "</td>\r\n"
 							+ "  </tr>\r\n";
 				}
-				res.add(plantilla);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		plantilla += "</table>" + "</body>\r\n" + "</html>";
+		if(ltitulos.isEmpty()) {
+			return plantilla + "\r\n <p align = \"center\">No hay articulos disponibles hoy<p>";
+		}else {
 		return plantilla;
+		}
+	}
+	public void crearNotificacion(String equipo) {
+		this.noti.setCont(this.clasificacion(equipo) + this.reclasificasion(equipo) +this.partidos(equipo)+ this.minarArt(equipo));
+	}
+	public Notificacion getNotificacion() {
+		return this.noti;
 	}
 }
