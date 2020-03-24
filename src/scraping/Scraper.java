@@ -24,6 +24,7 @@ public class Scraper {
 		ArrayList<String> titulosl = new ArrayList<>();// titulos de la tabla
 		String imagensrc="";//link de la imagen del escudo del equipo
 		ArrayList<String> cont = new ArrayList<>();//celdas de la tabla
+		boolean encontrado = false;
 		String Reclasificacion = "<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "<style>\r\n" //inicio html tabla
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}\r\n" + "</style>\r\n" + "</head>\r\n"
 				+ "<body>\r\n"+"<h1 align = \"center\">Reclasificación</h1>" + "<table align = \"center\">\r\n<tr>"; 
@@ -48,24 +49,32 @@ public class Scraper {
 							coincidencia = filas.get(filaE); //asigno la fila
 							Elements imagen = coincidencia.getElementsByTag("img");//consigo la imagen del escudo
 							imagensrc = imagen.get(0).attr("src");//saco el link que esta en el atributo "src"
+							encontrado = true;
 						}
 				}
 			}
-			Elements celdas = coincidencia.getElementsByTag("td");//separo celdas de la fila 
-			for(Element celda:celdas) {
-				cont.add(celda.text());//añado la celdas
-			}
-			for(int i=0;i<titulosl.size();i++) {
-				Reclasificacion +=  "\r\n<th>"+titulosl.get(i)+"</th>\r\n";//agrego los titulos de la tabla al html
-			}
-			Reclasificacion += "\r\n <tr>\r\n";//abro fila
-			for(int i=0;i<cont.size();i++) {
-				if(i==1) {
-					Reclasificacion += "\r\n<td><img src="+ imagensrc+">"//añado la imagen del escudo
-							+ cont.get(i) + "</td>\r\n";
-				}else {
-				Reclasificacion +=  "\r\n<td>"+cont.get(i)+"</td>\r\n";//agrego celda por celda
+			if (encontrado) {
+				Elements celdas = coincidencia.getElementsByTag("td");// separo celdas de la fila
+				for (Element celda : celdas) {
+					cont.add(celda.text());// añado la celdas
 				}
+			}
+			if (!cont.isEmpty()) {
+				for (int i = 0; i < titulosl.size(); i++) {
+					Reclasificacion += "\r\n<th>" + titulosl.get(i) + "</th>\r\n";// agrego los titulos de la tabla al
+																					// html
+				}
+				Reclasificacion += "\r\n <tr>\r\n";// abro fila
+				for (int i = 0; i < cont.size(); i++) {
+					if (i == 1) {
+						Reclasificacion += "\r\n<td><img src=" + imagensrc + ">"// añado la imagen del escudo
+								+ cont.get(i) + "</td>\r\n";
+					} else {
+						Reclasificacion += "\r\n<td>" + cont.get(i) + "</td>\r\n";// agrego celda por celda
+					}
+				}
+			} else {
+				Reclasificacion += "<p align =\"center\"> su equipo no está clasificado</p>";
 			}
 			Reclasificacion += "  </tr>\r\n" + "</table>\r\n" + "</body>\r\n" + "</html>";//cierro fila, tabla y html
 		} catch (Exception e) {
@@ -155,6 +164,9 @@ public class Scraper {
 			
 		} catch (Exception e) {
 		}
+		if(temps.isEmpty()) {
+			plantilla +="<p align=\"center\">No hay horarios para su equipo</p>";//cierro tabla y html
+		}
 		plantilla +="</table>\r\n"+ "</body>\r\n" + "</html>";//cierro tabla y html
 		return plantilla;
 	}
@@ -164,6 +176,7 @@ public class Scraper {
 		ArrayList<String> titulos = new ArrayList<>();
 		ArrayList<String> cont = new ArrayList<>();
 		String img ="";
+		boolean encontrado = false;
 		int filaE=0;
 		Element coincidencia=null;
 		String clasificacion = "\r\n<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
@@ -190,25 +203,32 @@ public class Scraper {
 							filaE = filas.indexOf(fila);//consigo el index de la fila donde aparecio
 							coincidencia = filas.get(filaE); //asigno la fila
 							img = imagenes.get(0).attr("src");//link imagen del escudo
+							encontrado = true;
 						}
 				}
 			}
-			Elements celdas = coincidencia.getElementsByTag("td");//separo celdas de la fila 
-			for(Element celda:celdas) {
-				cont.add(celda.text());
-			}
-			for(int i =0;i<titulos.size();i++) {
-				if(i==1) {
-					clasificacion += "<th> </th>" ;
+			if (encontrado) {
+				Elements celdas = coincidencia.getElementsByTag("td");// separo celdas de la fila
+				for (Element celda : celdas) {
+					cont.add(celda.text());
 				}
-				clasificacion += "<th>"+titulos.get(i)+"</th>" ;
 			}
-			clasificacion += "</tr>\r\n<tr>";
-			for(int i =0;i<cont.size();i++) {
-				if(i==1) {
-					clasificacion += "<td>"+"<img src="+img+" alt=\"\">"+"</td>" ;
+			if (!cont.isEmpty()) {
+				for (int i = 0; i < titulos.size(); i++) {
+					if (i == 1) {
+						clasificacion += "<th> </th>";
+					}
+					clasificacion += "<th>" + titulos.get(i) + "</th>";
 				}
-				clasificacion += "<td>"+cont.get(i)+"</td>" ;
+				clasificacion += "</tr>\r\n<tr>";
+				for (int i = 0; i < cont.size(); i++) {
+					if (i == 1) {
+						clasificacion += "<td>" + "<img src=" + img + " alt=\"\">" + "</td>";
+					}
+					clasificacion += "<td>" + cont.get(i) + "</td>";
+				}
+			} else {
+				clasificacion += "<p align =\"center\"> su equipo no está clasificado</p>";
 			}
 			clasificacion += "</tr>\r\n" + "</table>\r\n" + "</body>\r\n" + "</html>";
 			
@@ -297,8 +317,13 @@ public class Scraper {
 	}
 	public void crearNotificacion(String equipo) {
 		this.noti.setCont(this.clasificacion(equipo) + this.reclasificasion(equipo) +this.partidos(equipo)+ this.minarArt(equipo));
+		System.out.println(noti.getCont());
 	}
 	public Notificacion getNotificacion() {
 		return this.noti;
+	}
+	public static void main(String[] args) {
+		Scraper a = new Scraper();
+		a.crearNotificacion("Pereira");
 	}
 }
