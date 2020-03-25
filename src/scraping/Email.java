@@ -41,7 +41,7 @@ public class Email {
 	            message.setFrom(new InternetAddress("from@gmail.com"));
 	            message.setRecipients(
 	                    Message.RecipientType.TO,
-	                    InternetAddress.parse("mile.120501@gmail.com, angulocita@gmail.com")
+	                    InternetAddress.parse("mile.120501@gmail.com")
 	            );
 	            message.setSubject("Probando correo Gmail SSL");
 	            message.setContent(cont,"text/html");

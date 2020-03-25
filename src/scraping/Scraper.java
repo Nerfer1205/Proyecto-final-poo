@@ -24,10 +24,17 @@ public class Scraper {
 		ArrayList<String> titulosl = new ArrayList<>();// titulos de la tabla
 		String imagensrc="";//link de la imagen del escudo del equipo
 		ArrayList<String> cont = new ArrayList<>();//celdas de la tabla
+		String eq ="";
 		boolean encontrado = false;
 		String Reclasificacion = "<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "<style>\r\n" //inicio html tabla
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}\r\n" + "</style>\r\n" + "</head>\r\n"
 				+ "<body>\r\n"+"<h1 align = \"center\">Reclasificación</h1>" + "<table align = \"center\">\r\n<tr>"; 
+		if (equipo.contains(" ")) {
+			eq = equipo.substring(equipo.indexOf(" ") + 1);
+		} else {
+			eq = equipo;
+		}
+		
 		try {
 			Document doc = Jsoup.connect("https://www.futbolred.com/tabla-de-posiciones/liga-aguila").get();//Html donde esta la tabla
 			Elements tablas = doc.getElementsByTag("table");//separo la tabla del resto del html
@@ -44,7 +51,7 @@ public class Scraper {
 					}
 				}
 				for (Element celda : celdas) {//recorro celda por celda de cada fila
-						if(celda.text().compareTo(equipo)==0) {//busco el nombre del equipo
+						if(celda.text().contains(eq)) {//busco el nombre del equipo
 							filaE = filas.indexOf(fila);//consigo el index de la fila donde aparecio
 							coincidencia = filas.get(filaE); //asigno la fila
 							Elements imagen = coincidencia.getElementsByTag("img");//consigo la imagen del escudo
@@ -88,9 +95,17 @@ public class Scraper {
 		int filaE=0; //indice de la fila donde se encontro el equipo
 		String temp="";//Almacena temporalmente el titulo de la zona de la tabla que se esta recorriendo
 		String comparar = ""; //Almacena el valor del titulo actual en la iteracion
+		String eqi ="";
 		String plantilla = "<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}\r\n" + "</style>\r\n" + "<body>"
 				+"<h1 align = \"center\">Partidos</h1>"+ "<table align = \"center\">\r\n";
+		if (equipo.contains(" ")) {
+			eqi = equipo.substring(equipo.indexOf(" ") + 1);
+		} else {
+			eqi = equipo;
+		}
+		
+		String eq = equipo.substring(equipo.indexOf(" ")+1);
 		ArrayList <String> ci= new ArrayList<>();//array para guardar las coincidencias
 		ArrayList <String> temps= new ArrayList<>();//para guardar titulos
 		ArrayList <String> cont= new ArrayList<>();//para guardar celdas
@@ -114,7 +129,7 @@ public class Scraper {
 						temp=comparar;
 					}
 					for (Element celda : celdas) {
-						if(celda.text().contains(equipo)) {//busco el nombre del equipo
+						if(celda.text().contains(eqi)) {//busco el nombre del equipo
 							filaE = filas.indexOf(fila);//consigo el index de la fila donde aparecio
 							if(temp.contains("HORA")) {//si el titulo temporal contiene este string
 								sub=temp;//se asigna a un string temporal
@@ -179,9 +194,21 @@ public class Scraper {
 		boolean encontrado = false;
 		int filaE=0;
 		Element coincidencia=null;
+		String eq ="";
 		String clasificacion = "\r\n<!DOCTYPE html>\r\n" + "<html>\r\n" + "<head>\r\n" + "</head>\r\n" + "<style>\r\n"
 				+ "table, th, td {\r\n" + "  border: 1px solid black;\r\n" + "}</style>\r\n" + "<body>\r\n"
 				+ "<h1 align = \"center\">Clasificación</h1>" + "<table align=\"center\">\r\n<tr>";
+		if (equipo.contains(" ")) {
+			eq = equipo.substring(equipo.indexOf(" ") + 1);
+			if(eq.contains(".")) {
+				String uno = eq.substring(eq.indexOf(".")+1);
+				String dos = eq.substring(0,1);
+				eq = dos+uno;
+			}
+		} else {
+			eq = equipo;
+		}
+		
 		try {
 			doc = Jsoup.connect("https://aquehorajuega.co/competiciones/colombia/tabla-de-posiciones/").get();
 			Elements tablas = doc.getElementsByTag("table");//separo la tabla del resto del html
@@ -199,7 +226,7 @@ public class Scraper {
 					}
 				}
 				for (Element celda : celdas) {//recorro celda por celda de cada fila
-						if(celda.text().compareTo(equipo)==0) {//busco el nombre del equipo
+						if(celda.text().contains(eq)) {//busco el nombre del equipo
 							filaE = filas.indexOf(fila);//consigo el index de la fila donde aparecio
 							coincidencia = filas.get(filaE); //asigno la fila
 							img = imagenes.get(0).attr("src");//link imagen del escudo
@@ -317,13 +344,8 @@ public class Scraper {
 	}
 	public void crearNotificacion(String equipo) {
 		this.noti.setCont(this.clasificacion(equipo) + this.reclasificasion(equipo) +this.partidos(equipo)+ this.minarArt(equipo));
-		System.out.println(noti.getCont());
 	}
 	public Notificacion getNotificacion() {
 		return this.noti;
-	}
-	public static void main(String[] args) {
-		Scraper a = new Scraper();
-		a.crearNotificacion("Pereira");
 	}
 }
